@@ -13,11 +13,17 @@ function rndColor(arr) {
 app.use("/",express.static("./html"));
 app.get("/tags", (req, res) => {
     var response = [];
-    var tagData = JSON.parse(fs.readFileSync('./tags/tags.json', 'utf8'));
+    var tagData = JSON.parse(fs.readFileSync('./data/tags.json', 'utf8'));
 
     for(var tag in tagData.tags){
         response.push({text: tagData.tags[tag], color: rndColor(response)} );
     }
+    res.send(response);
+});
+
+app.get("/text", (req, res) => {
+    
+    var response = fs.readFileSync('./data/text.txt', 'utf8');
     res.send(response);
 });
 

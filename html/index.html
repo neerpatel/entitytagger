@@ -115,25 +115,11 @@
     myapp = new Vue({
       el: "#app",
       data: {
-        text : `Operating Systems: RHEL/CentOS 5/6/7, Ubuntu/Debian/Fedora, Sun Solaris 7/8/9/10, Windows Server  2003/2008/2012 
-Virtualization: VMware, virtual box
-Languages: C#, Java, Shell scripting, Python, PowerShell, Ruby
-Networking: HTTP/HTTPS, FTP, NFS, SMB, SMTP
-Build/Automation: Ansible, Chef, Puppet, Jenkins, Maven, Ant
-Web/Application Servers: Apache, JBoss, Tomcat, WebSphere Application Server
-Databases: MS SQL server 2008, Oracle, PostgreSQL, NoSQL
-Monitoring tools: Nagios, Splunk, AppDynamics
-Cloud Environment: Amazon Web Services: EC2, S3, ELB, auto scaling Servers, Glacier, Storage Lifecycle rules, Elastic Beanstalk, Cloud Front, Elastic cache, RDS, VPC, Direct Connect, Route 53, Red Shift, Cloud watch, Cloud trail, IAM Roles, SNS.
-Versioning Tools: Perforce, GIT, Subversion and GITHUB.
-Languages: Python., HTML5, CSS3, PHP, Bash Scripting.
-Databases: Oracle 11g, MS SQL Server, SQL Server Management Studio, RDBMS.
-Web Servers: Apache Web Server 2.0, Apache Tomcat 6.0, Sun ONE Web Server 6.0 & IIS Web Server 4.0/5.0, web logic.
-Network Protocols: TCP/IP, FTP, SMTP, SOAP, TCP/IP, HTTP/HTTPS, NDS, DHCP, NFS, Cisco Routers, LAN.
-Tools: & utilities: Ansible, Tableau, Jenkins, ANT, MAVEN, Sophos, Risk analysis, SQL Server Management Studio, Project Management, MS Office, MS `,
+        text : ``,
         text_tag:'',
         selected : '' ,
-        selected_tag : 'CLOUD',
-        option : 'CLOUD',
+        selected_tag : '',
+        option : '',
         tags : [], //[ {text: 'ORG' , color: '#e74c3c'} , {text: 'PERS' , color: '#3498db'} , {text: 'DATE' , color: '#1abc9c'}, {text: 'PLACE' , color: '#f1c40f'}, {text: 'POS' , color: '#34495e'}, {text: 'NEG' , color: '#95a5a6'} ]
         to_add_tag : '',
         isactive : function(a){return a== this.selected_tag},
@@ -149,7 +135,14 @@ Tools: & utilities: Ansible, Tableau, Jenkins, ANT, MAVEN, Sophos, Risk analysis
       mounted() {
         axios.get('/tags')
             .then(response => {
-                this.tags = response.data})
+                this.tags = response.data;
+                this.selected_tag = response.data[0].text;
+                this.option = response.data[0].text;
+            });
+        axios.get('/text')
+        .then(response => {
+            this.text = response.data;
+        });            
       },
       methods: {
 
