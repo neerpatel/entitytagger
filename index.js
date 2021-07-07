@@ -27,6 +27,25 @@ app.get("/text", (req, res) => {
     res.send(response);
 });
 
+app.post("/savetags", (req, res) => {
+    var body = '';
+    //prepping for additional files to save
+    taglistfile = './data/taglist.txt';
+    //this is the file that will load the tag list into the editor
+    tagjsonfile = './data/tags.json';
+    // get the data and append it to the body variable.
+    req.on('data', function(data) {
+        body += data;
+    });
+    //When the stream is done, overwrite the old file
+    req.on('end', function (){
+        fs.writeFile(tagjsonfile, body, function() {
+            res.end();
+        });
+    });
+});
+
+
 app.get("*", (req, res) => {
     res.sendFile(path.resolve(__dirname, "html/index.html"));
 });
