@@ -64,6 +64,8 @@
                         <button class="btn btn-outline-secondary" type="button" :disabled="to_add_tag ? false : true" v-on:click="add_tag">Add</button>
                     </div>
                 </div>
+                <button v-on:click="save_tags" class="btn btn-outline-success btn-lg">Save Tags &nbsp; <i class="fas fa-save"></i></button>
+
 
 
 
@@ -83,7 +85,7 @@
                         <div>
                             <textarea v-model="text" placeholder="add multiple lines" style="width: 40em;height: 10em"></textarea>
                             <button v-on:click="copy_text" class="btn btn-outline-success btn-lg">Tag Text &nbsp; <i class="fas fa-tag"></i></button>
-                            <button v-on:click="save_tags" class="btn btn-outline-success btn-lg">Save Tags &nbsp; <i class="fas fa-save"></i></button>
+                            <button v-on:click="save_document" class="btn btn-outline-success btn-lg">Save Text &nbsp; <i class="fas fa-save"></i></button>
                             <br><br>
                             <h5>Select the tag type from Tag list, and select the word from the below text to be tagged.</h5>
                             <br><br>
@@ -94,6 +96,8 @@
                             <button v-on:click="to_json" class="btn btn-outline-success btn-lg">Generate Spacy Training data &nbsp; <i class="fas fa-code"></i></button>
                             <br><br>
                             <pre><code id="spacy_code" class="python Darkula"></code></pre>
+                            <button v-on:click="save_spacy" class="btn btn-outline-success btn-lg">Save Training data &nbsp; <i class="fas fa-save"></i></button>
+
                         </div>
                     </div>
                 </div>
@@ -161,14 +165,25 @@
                 this.to_add_tag = ''
 
             },
-            save_tags : function(event){
-                var taglist = this.getTagArray();
+            save : function(data){
                 //post the tag list to the backend
-                axios.post('/savetags',taglist)
+                axios.post('/save',data)
                 .then(response => {
                      console.log('Saved file successfully');
                      //instead of console logs, we will want to give visual indication in VUE of the success.
                  });
+            },
+            save_tags : function(event){
+                var taglist = {filename: 'tags.json', content: this.getTagArray()};
+                this.save(taglist);  
+            },
+            save_document : function(event){
+                var origDoc = {filename: 'text.txt', content: this.text};
+                this.save(origDoc);
+            },
+            save_spacy : function(event){
+                var origDoc = {filename: 'spacy.txt', content: document.getElementById("spacy_code").innerHTML};
+                this.save(origDoc);
             },
             getTagArray : function(event){
                 var taglist=[];

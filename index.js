@@ -2,6 +2,7 @@ const express = require("express");
 const path = require('path');
 const randomColor = require('randomcolor');
 const fs = require('fs');
+const bodyParser = require('body-parser');
 const app = express();
 
 function rndColor(arr) {
@@ -10,7 +11,13 @@ function rndColor(arr) {
     return color;
 }
 
+isObject = function(a) {
+    return (!!a) && (a.constructor === Object);
+};
+
 app.use("/",express.static("./html"));
+app.use(bodyParser.json());
+
 app.get("/tags", (req, res) => {
     var response = [];
     var tagData = JSON.parse(fs.readFileSync('./data/tags.json', 'utf8'));
@@ -22,29 +29,26 @@ app.get("/tags", (req, res) => {
 });
 
 app.get("/text", (req, res) => {
-    
     var response = fs.readFileSync('./data/text.txt', 'utf8');
     res.send(response);
 });
 
-app.post("/savetags", (req, res) => {
-    var body = '';
-    //prepping for additional files to save
-    taglistfile = './data/taglist.txt';
-    //this is the file that will load the tag list into the editor
-    tagjsonfile = './data/tags.json';
-    // get the data and append it to the body variable.
-    req.on('data', function(data) {
-        body += data;
+app.post("/save", (req, res) => {
+    // Set the filename, contents and our variable that will hold the final content to persist
+    var documentFile = './data/'+ req.body.filename;
+    var saveContents = req.body.content;
+    var persist;
+    //exists because we want to stringify objects from bodyparser for persisting to a file, otherwise it saves the [object Object] as the value
+    if (isObject(saveContents)) {
+        persist = JSON.stringify(saveContents);
+    }
+    else {
+        persist=saveContents;
+    }
+    fs.writeFile(documentFile, persist, function() {
+        res.end();
     });
-    //When the stream is done, overwrite the old file
-    req.on('end', function (){
-        fs.writeFile(tagjsonfile, body, function() {
-            res.end();
-        });
-    }); 
 });
-
 
 app.get("*", (req, res) => {
     res.sendFile(path.resolve(__dirname, "html/index.html"));
