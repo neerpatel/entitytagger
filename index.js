@@ -32,6 +32,10 @@ app.get("/text", (req, res) => {
     var response = fs.readFileSync('./data/text.txt', 'utf8');
     res.send(response);
 });
+app.get("/spacy", (req, res) => {
+    var response = fs.readFileSync('./data/spacy.txt', 'utf8');
+    res.send(response);
+});
 
 app.post("/save", (req, res) => {
     // Set the filename, contents and our variable that will hold the final content to persist
