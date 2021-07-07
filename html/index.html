@@ -83,12 +83,12 @@
                         <div>
                             <textarea v-model="text" placeholder="add multiple lines" style="width: 40em;height: 10em"></textarea>
                             <button v-on:click="copy_text" class="btn btn-outline-success btn-lg">Tag Text &nbsp; <i class="fas fa-tag"></i></button>
+                            <button v-on:click="save_tags" class="btn btn-outline-success btn-lg">Save Tags &nbsp; <i class="fas fa-save"></i></button>
                             <br><br>
                             <h5>Select the tag type from Tag list, and select the word from the below text to be tagged.</h5>
                             <br><br>
                             <div v-on:click="done">
                                 <span style="white-space: pre-line" id="_text_field"></span>
-
                             </div>
                             <br><br>
                             <button v-on:click="to_json" class="btn btn-outline-success btn-lg">Generate Spacy Training data &nbsp; <i class="fas fa-code"></i></button>
@@ -161,7 +161,25 @@
                 this.to_add_tag = ''
 
             },
-
+            save_tags : function(event){
+                var taglist = this.getTagArray();
+                //post the tag list to the backend
+                axios.post('/savetags',taglist)
+                .then(response => {
+                     console.log('Saved file successfully');
+                     //instead of console logs, we will want to give visual indication in VUE of the success.
+                 });
+            },
+            getTagArray : function(event){
+                var taglist=[];
+                //loop over the tags and push them into the array
+                for(var i in this.tags){
+                    taglist.push(this.tags[i].text)
+                }
+                //set the return object to the format expected
+                var tagobj = {tags:taglist};
+                return tagobj;
+            },
             getRandomColor : function getRandomColor() {
                   var letters = '0123456789ABCDEF';
                   var color = '#';
