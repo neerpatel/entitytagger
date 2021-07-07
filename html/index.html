@@ -92,6 +92,7 @@
                             </div>
                             <br><br>
                             <button v-on:click="to_json" class="btn btn-outline-success btn-lg">Generate Spacy Training data &nbsp; <i class="fas fa-code"></i></button>
+                            <button v-on:click="load_spacy" class="btn btn-outline-success btn-lg">Load Data &nbsp; <i class="fas fa-code"></i></button>
                             <br><br>
                             <pre><code id="spacy_code" class="python Darkula"></code></pre>
                         </div>
@@ -108,7 +109,6 @@
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js" integrity="sha512-bZS47S7sPOxkjU/4Bt0zrhEtWx0y0CRkhEp8IckzK+ltifIIE9EMIMTuT/mEzoIMewUINruDBIR/jJnbguonqQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
 <script>
 
@@ -150,7 +150,7 @@
                 document.getElementById("_text_field").innerHTML ='';
                 docs = this.text.split('\n');
                 for(var i=0;i<docs.length;i++){
-                    document.getElementById("_text_field").innerHTML += `<div id="doc_${i}">${docs[i]}</div>`
+                    document.getElementById("_text_field").innerHTML += `<div id="doc_${i}">${docs[i].replaceAll('\n','').replaceAll('\r','')}</div>`
                 }
             },
 
@@ -200,23 +200,61 @@
                     }
                     spacy_doc.push(text_json);
                 });
-                console.log(spacy_doc)
                 var train_data ='train_data = [\n';
                 var docs = this.text.split('\n');
                 for(var i=0; i<spacy_doc.length;i++){
-                    console.log(spacy_doc[i])
                     if(spacy_doc[i].length){
-                        train_data += `("${docs[i]}", [ ${spacy_doc[i].join(', ')} ])\n`;
+                        train_data += `("${docs[i].replaceAll('\n','').replaceAll('\r','')}", [ ${spacy_doc[i].join(', ')} ])`;
                     }
                     else{
-                        train_data += `("${docs[i]}", [ ])\n`;
+                        train_data += `("${docs[i].replaceAll('\n','').replaceAll('\r','')}", [ ])`;
+                    }
+                    if (i<spacy_doc.length) {
+                        train_data += ',\n';
                     }
 
                 }
                 train_data += ']';
                 document.getElementById("spacy_code").innerHTML = train_data;
             },
+            load_spacy  : function (event) {
 
+                axios.get('/spacy')
+                    .then(response => {
+                        var spacy_text = response.data;
+                        var i = 0;
+                        document.getElementById("_text_field").innerHTML = "";
+                        this.text = "";
+                        let regex_line = /\(\"(?<line>.*)\",\s\[\s(?<tags>.*)\]\)\,/g;
+                        let regex_tags = /\((?<start>\d{1,3})\,\s(?<end>\d{1,3})\,\s\'(?<tag>[\w\s]*)\'\),?\s/g;
+                        let spacey_lines = [...spacy_text.matchAll(regex_line)];
+                        for(let spacey_line in spacey_lines) {
+                            let {line, tags} = spacey_lines[spacey_line].groups;
+                            this.text += line + '\n';
+                            var char_index = 0;
+                            var return_text = "";
+                            let line_tags = [...tags.matchAll(regex_tags)];
+                            for(let line_tag in line_tags) {
+                                
+                                let {start, end, tag} = line_tags[line_tag].groups;
+                                
+                                return_text += line.slice(char_index, start);
+                                var color_tag = this.color_of(tag);
+                                var tagElm = document.createElement("tag");
+
+                                tagElm.setAttribute('onclick', "untag(this)");
+                                tagElm.setAttribute('label', tag);
+                                tagElm.setAttribute('text', line.slice(start,end));
+                                tagElm.innerHTML = '<span class="named-badge btn btn-warning" style="color:#fff; background-color:'+color_tag+'; border-color:'+color_tag+';">' + line.slice(start,end) + ' <span class="badge badge-light"> '+tag+' </span></span>'
+                                return_text += tagElm.outerHTML;
+                                char_index = end;
+                            }
+                            return_text += line.slice(char_index, line.length);
+                            document.getElementById("_text_field").innerHTML += `<div id="doc_${i}">${return_text}</div>`;
+                            i++;
+                        }
+                    });
+            },
             done : function (event) {
                 var sel, range;
                 if (window.getSelection) {
@@ -227,9 +265,7 @@
                         range.deleteContents();
                         var tag = document.createElement("tag");
                         tag.setAttribute('text', text);
-
                         tag.setAttribute('onclick', "untag(this)");
-
                         tag.setAttribute('label', this.selected_tag);
                         color_tag = this.color_of(this.selected_tag)
                         tag.innerHTML = '<span class="named-badge btn btn-warning" style="color:#fff; background-color:'+color_tag+'; border-color:'+color_tag+';">'+text+' <span class="badge badge-light"> '+this.selected_tag+' </span></span>'
