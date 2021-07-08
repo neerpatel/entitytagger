@@ -14,8 +14,7 @@
 
 
     <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css"
-          integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@5.0.2/dist/superhero/bootstrap.min.css">
         <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
 
     <!-- HighlightJS-->
@@ -38,15 +37,15 @@
     </style>
 </head>
 <body>
-<div class="container">
-    <div class="row" id="app">
-        <div class="col-sm-4">
+<div class="container-fluid">
+    <div class="row no-gutters" id="app">
+        <div class="col-3">
 
 
 
-            <div class="card border-info mb-3">
+            <div class="card border-secondary mb-3">
                 <div class="card-header"> Tags list</div>
-                <div class="card-body text-info">
+                <div class="card-body text-white">
 
 
 
@@ -75,17 +74,19 @@
 
 
         </div>
-        <div class="col-sm-8">
-            <div class="row">
-                <div class="card border-info mb-3">
+        <div class="col-9">
+            <div class="row ">
+                <div class="card border-secondary mb-3 w-100">
                     <div class="card-header">
                         Tape your text here and click on Tag Text to start tagging.
                     </div>
-                    <div class="card-body text-info">
+                    <div class="card-body text-white">
                         <div>
-                            <textarea v-model="text" placeholder="add multiple lines" style="width: 40em;height: 10em"></textarea>
-                            <button v-on:click="copy_text" class="btn btn-outline-success btn-lg">Tag Text &nbsp; <i class="fas fa-tag"></i></button>
-                            <button v-on:click="save_document" class="btn btn-outline-success btn-lg">Save Text &nbsp; <i class="fas fa-save"></i></button>
+                            <textarea v-model="text" placeholder="add multiple lines" style="width: 100%;height: 20em"></textarea>
+                            <div>
+                                <button v-on:click="copy_text" class="btn btn-outline-success btn-lg">Tag Text &nbsp; <i class="fas fa-tag"></i></button>
+                                <button v-on:click="save_document" class="btn btn-outline-success btn-lg">Save Text &nbsp; <i class="fas fa-save"></i></button>
+                            </div>
                             <br><br>
                             <h5>Select the tag type from Tag list, and select the word from the below text to be tagged.</h5>
                             <br><br>
@@ -124,7 +125,7 @@
         selected : '' ,
         selected_tag : '',
         option : '',
-        tags : [], //[ {text: 'ORG' , color: '#e74c3c'} , {text: 'PERS' , color: '#3498db'} , {text: 'DATE' , color: '#1abc9c'}, {text: 'PLACE' , color: '#f1c40f'}, {text: 'POS' , color: '#34495e'}, {text: 'NEG' , color: '#95a5a6'} ]
+        tags : [], 
         to_add_tag : '',
         isactive : function(a){return a== this.selected_tag},
         color_of : function(tag){
