@@ -37,6 +37,8 @@
     </style>
 </head>
 <body>
+
+
 <div class="container-fluid">
     <div class="row no-gutters" id="app">
         <div class="col-3">
@@ -110,13 +112,15 @@
 <!-- Optional JavaScript -->
     <!-- JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <script src="https://unpkg.com/vue-toasted"></script>
 
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
 <script>
-
+     
+    Vue.use(Toasted)
     myapp = new Vue({
       el: "#app",
       data: {
@@ -150,7 +154,6 @@
         });            
       },
       methods: {
-
             copy_text : function(){
                 document.getElementById("_text_field").innerHTML ='';
                 docs = this.text.split('\n');
@@ -170,8 +173,15 @@
                 //post the tag list to the backend
                 axios.post('/save',data)
                 .then(response => {
-                     console.log('Saved file successfully');
-                     //instead of console logs, we will want to give visual indication in VUE of the success.
+                     //give visual indication in VUE of the success.
+                     var toast = this.$toasted.show("Saved File Successfully", { 
+                        theme: "toasted-primary", 
+                        position: "top-right", 
+                        duration : 5000,
+                        icon: "save",
+                        iconPack: "fontawesome",
+                        type: "success"
+                        });
                  });
             },
             save_tags : function(event){
