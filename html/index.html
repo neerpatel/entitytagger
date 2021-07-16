@@ -1,30 +1,22 @@
 <!doctype html>
 <html lang="en">
 <head>
+    <title>Named Entity Spacy Tagger</title>
     <!-- Required meta tags -->
     <meta charset="UTF-8">
     <meta name="description" content="this is a Manual Named Entities Tagger for Spacy, You can use it to create your own training datasets.">
     <meta name="keywords" content="HTML,CSS,XML,JavaScript">
-    <meta name="author" content="Hamza EL KAROUI">
+    <meta name="author" content="Hamza EL KAROUI, Neer Patel, Jeff Loyd">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-
-
     <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@5.0.2/dist/superhero/bootstrap.min.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@5.0.2/dist/superhero/bootstrap.min.css">
         <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
-
     <!-- HighlightJS-->
-
     <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
     <link rel="stylesheet" href="dracula.css">
     <script>hljs.initHighlightingOnLoad();</script>
-
-    <title>Named Entity Spacy Tagger | By Hamza EL KAROUI</title>
-
     <style>
           .named-badge {
                     user-select: none;
@@ -33,61 +25,56 @@
                     -webkit-user-select: none;
                     -o-user-select: none;
             }
-
     </style>
 </head>
 <body>
 
-
 <div class="container-fluid">
     <div class="row no-gutters" id="app">
         <div class="col-3">
-
-
-
             <div class="card border-secondary mb-3">
                 <div class="card-header"> Tags list</div>
                 <div class="card-body text-white">
-
-
-
                     <div v-for="tag in tags"  v-bind:class="['btn',isactive(tag.text) ? 'btn-success' : 'btn-outline-success']" v-bind:style="{'background-color': tag.color ,  'border-color': tag.color, 'color':'#fff'}">
                         <input  type="radio" class="" :value="tag.text" :name="tag.text" :id="tag.text" v-model="selected_tag">
                         <label class="form-check-label" :for="tag.text"> {{ tag.text }} </label>
                         <br>
                     </div>
                     <br>
-
                 <h5 class="card-title">Tag List</h5>
                 <div class="input-group mb-3">
                     <input placeholder="Type a new tag name" class="form-control" type="text" v-model="to_add_tag" v-on:keyup.enter="add_tag">
                     <div class="input-group-append">
-                        <button class="btn btn-outline-secondary" type="button" :disabled="to_add_tag ? false : true" v-on:click="add_tag">Add</button>
+                        <button class="btn btn-light btn-sm" type="button" :disabled="to_add_tag ? false : true" v-on:click="add_tag">Add</button>
                     </div>
                 </div>
-                <button v-on:click="save_tags" class="btn btn-outline-success btn-lg">Save Tags &nbsp; <i class="fas fa-save"></i></button>
-
-
-
-
-
+                <button v-on:click="save_tags" class="btn btn-outline-success btn-sm">Save Tags &nbsp; <i class="fas fa-save"></i></button>
                 </div>
             </div>
-
-
         </div>
         <div class="col-9">
             <div class="row ">
                 <div class="card border-secondary mb-3 w-100">
                     <div class="card-header">
-                        Tape your text here and click on Tag Text to start tagging.
+                        Click on "Tag Text" to start tagging.
                     </div>
                     <div class="card-body text-white">
                         <div>
-                            <textarea v-model="text" placeholder="add multiple lines" style="width: 100%;height: 20em"></textarea>
+                            <paginate name="file_list" :list="file_list" :per="2"></paginate>
+                            <paginate-links for="file_list" :limit="2" :show-step-links="true" @change="clickCallback" :hide-single-page="true"
+                            :classes="{
+                                'ul': ['pagination', 'pagination-sm'],
+                                'ul.paginate-links > li.right-arrow > a': 'page-link',
+                                'ul.paginate-links > li.left-arrow > a': 'page-link',
+                                'ul.paginate-links > li.right-arrow': 'page-item',
+                                'ul.paginate-links > li.left-arrow': 'page-item',
+                                'ul.paginate-links > li.number > a': 'page-link',
+                                'ul.paginate-links > li.number': 'page-item'
+                            }"></paginate-links>
+                            <textarea v-model="text" placeholder="add multiple lines" style="width: 100%;height: 20em" v-on:change="signalUserInputChange"></textarea>
                             <div>
-                                <button v-on:click="copy_text" class="btn btn-outline-success btn-lg">Tag Text &nbsp; <i class="fas fa-tag"></i></button>
-                                <button v-on:click="save_document" class="btn btn-outline-success btn-lg">Save Text &nbsp; <i class="fas fa-save"></i></button>
+                                <button v-on:click="copy_text" class="btn btn-outline-success btn-sm">Tag Text &nbsp; <i class="fas fa-tag"></i></button>
+                                <button v-on:click="save_document" class="btn btn-outline-success btn-sm">Save Text &nbsp; <i class="fas fa-save"></i></button>
                             </div>
                             <br><br>
                             <h5>Select the tag type from Tag list, and select the word from the below text to be tagged.</h5>
@@ -96,12 +83,11 @@
                                 <span style="white-space: pre-line" id="_text_field"></span>
                             </div>
                             <br><br>
-                            <button v-on:click="to_json" class="btn btn-outline-success btn-lg">Generate Spacy Training data &nbsp; <i class="fas fa-code"></i></button>
-                            <button v-on:click="load_spacy" class="btn btn-outline-success btn-lg">Load Data &nbsp; <i class="fas fa-code"></i></button>
+                            <button v-on:click="to_json" class="btn btn-outline-success btn-sm">Generate Spacy Training data &nbsp; <i class="fas fa-code"></i></button>
+                            <button v-on:click="load_spacy" class="btn btn-outline-success btn-sm">Load Data &nbsp; <i class="fas fa-code"></i></button>
                             <br><br>
                             <pre><code id="spacy_code" class="python Darkula"></code></pre>
-                            <button v-on:click="save_spacy" class="btn btn-outline-success btn-lg">Save Training data &nbsp; <i class="fas fa-save"></i></button>
-
+                            <button v-on:click="save_spacy" class="btn btn-outline-success btn-sm">Save Training data &nbsp; <i class="fas fa-save"></i></button>
                         </div>
                     </div>
                 </div>
@@ -109,18 +95,18 @@
         </div>
     </div>
 </div>
-<!-- Optional JavaScript -->
     <!-- JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/vue"></script>
     <script src="https://unpkg.com/vue-toasted"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue-paginate/3.6.0/vue-paginate.min.js"></script>
 
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
 <script>
-     
     Vue.use(Toasted)
+    Vue.use(VuePaginate)
     myapp = new Vue({
       el: "#app",
       data: {
@@ -129,6 +115,12 @@
         selected : '' ,
         selected_tag : '',
         option : '',
+        file_list:[],
+        paginate:['file_list'],
+        current_file_contents:'',
+        current_active_file:'text.txt',
+        tags_file_name:'tags.json',
+        isEditing: false,
         tags : [], 
         to_add_tag : '',
         isactive : function(a){return a== this.selected_tag},
@@ -141,6 +133,12 @@
             return 0
         }
       },
+      beforeMount() {
+        window.addEventListener("beforeunload", this.preventNav)
+        this.$once("hook:beforeDestroy", () => {
+         window.removeEventListener("beforeunload", this.preventNav);
+        })
+      },
       mounted() {
         axios.get('/tags')
             .then(response => {
@@ -148,12 +146,23 @@
                 this.selected_tag = response.data[0].text;
                 this.option = response.data[0].text;
             });
-        axios.get('/text')
-        .then(response => {
-            this.text = response.data;
-        });            
+            this.get_filelist(true);
+            //this.load_file(this.current_active_file);
+        // axios.get('/text')
+        // .then(response => {
+        //     this.text = response.data;
+        // });            
       },
       methods: {
+            signalUserInputChange: function(evt){
+                   this.$emit("change", evt);
+                   console.log('change');
+                   this.isEditing = true;
+            },
+            clickCallback: function(toPage, fromPage) {
+                console.log(toPage);
+                console.log(fromPage);
+            },
             copy_text : function(){
                 document.getElementById("_text_field").innerHTML ='';
                 docs = this.text.split('\n');
@@ -161,39 +170,42 @@
                     document.getElementById("_text_field").innerHTML += `<div id="doc_${i}">${docs[i].replaceAll('\n','').replaceAll('\r','')}</div>`
                 }
             },
-
             add_tag : function(event){
                 if(!this.color_of(this.to_add_tag)){
                 this.tags.push({text: this.to_add_tag , color: this.getRandomColor()});
                 }
                 this.to_add_tag = ''
-
+                this.isEditing = true;
             },
             save : function(data){
-                //post the tag list to the backend
+                //post any file to the backend
                 axios.post('/save',data)
                 .then(response => {
                      //give visual indication in VUE of the success.
-                     var toast = this.$toasted.show("Saved File Successfully", { 
+                     this.toast_message('Saved File Successfully','success','save')
+                 });
+                 this.isEditing = false;
+            },
+            toast_message : function(message,type,icon){
+                var toast = this.$toasted.show(message, { 
                         theme: "toasted-primary", 
                         position: "top-right", 
                         duration : 5000,
-                        icon: "save",
+                        icon: icon,
                         iconPack: "fontawesome",
-                        type: "success"
+                        type: type
                         });
-                 });
             },
             save_tags : function(event){
-                var taglist = {filename: 'tags.json', content: this.getTagArray()};
+                var taglist = {filename: this.tags_file_name, content: this.getTagArray()};
                 this.save(taglist);  
             },
             save_document : function(event){
-                var origDoc = {filename: 'text.txt', content: this.text};
+                var origDoc = {filename: this.current_active_file, content: this.text};
                 this.save(origDoc);
             },
             save_spacy : function(event){
-                var origDoc = {filename: 'spacy.txt', content: document.getElementById("spacy_code").innerHTML};
+                var origDoc = {filename: this.current_active_file + '.spacy', content: document.getElementById("spacy_code").innerHTML};
                 this.save(origDoc);
             },
             getTagArray : function(event){
@@ -213,8 +225,7 @@
                     color += letters[Math.floor(Math.random() * 16)];
                   }
                   return color;
-                },
-
+            },
             to_json : function(e){
                 parts = document.getElementById("_text_field").childNodes
                 var spacy_doc = []
@@ -261,8 +272,32 @@
                 train_data += ']';
                 document.getElementById("spacy_code").innerHTML = train_data;
             },
+            load_file : function(filename){
+                console.log(filename);
+                axios.post('/loadfile',{filename: filename})
+                    .then(response => {
+                    this.text = response.data;
+                    this.current_file_contents = response.data;
+                });
+                // we will need to switch to this post instead of the get above once Neer makes the api endpoint
+                // axios.post('/loadfile',{loadfile: filename})
+                //     .then(response => {
+                //     this.text = response.data;
+                // });   
+            },
+            get_filelist : function(loadfileCheck=false){
+                axios.get('/getfilelist')
+                    .then(response => {
+                    // set the local file_list array equal to the json response from the API
+                    this.file_list = response.data;
+                    // set the active file equal to the first item in the array (maybe named filename?)
+                    this.current_active_file = response.data[0].filename;
+                    if (loadfileCheck==true){
+                        this.load_file(this.current_active_file);
+                    }
+                });   
+            },
             load_spacy  : function (event) {
-
                 axios.get('/spacy')
                     .then(response => {
                         var spacy_text = response.data;
@@ -299,6 +334,11 @@
                         }
                     });
             },
+            preventNav(event) {
+            if (!this.isEditing) return
+                event.preventDefault()
+                event.returnValue = ""
+            },
             done : function (event) {
                 var sel, range;
                 if (window.getSelection) {
@@ -315,6 +355,7 @@
                         tag.innerHTML = '<span class="named-badge btn btn-warning" style="color:#fff; background-color:'+color_tag+'; border-color:'+color_tag+';">'+text+' <span class="badge badge-light"> '+this.selected_tag+' </span></span>'
                         range.insertNode(tag);
                         window.getSelection().removeAllRanges();
+                        this.signalUserInputChange();
                     }
                 }
             }
@@ -325,8 +366,6 @@ untag = function(obj){
     text = obj.getAttribute('text');
     obj.replaceWith(document.createTextNode( text ));
 };
-
 </script>
-
 </body>
 </html>
