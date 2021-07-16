@@ -60,8 +60,8 @@
                     </div>
                     <div class="card-body text-white">
                         <div>
-                            <paginate name="file_list" :list="file_list" :per="2"></paginate>
-                            <paginate-links for="file_list" :limit="2" :show-step-links="true" @change="clickCallback" :hide-single-page="true"
+                            <paginate name="file_list" :list="file_list" :per="1"></paginate>
+                            <paginate-links for="file_list" :limit="1" :show-step-links="true" @change="clickCallback" :hide-single-page="true"
                             :classes="{
                                 'ul': ['pagination', 'pagination-sm'],
                                 'ul.paginate-links > li.right-arrow > a': 'page-link',
@@ -146,12 +146,7 @@
                 this.selected_tag = response.data[0].text;
                 this.option = response.data[0].text;
             });
-            this.get_filelist(true);
-            //this.load_file(this.current_active_file);
-        // axios.get('/text')
-        // .then(response => {
-        //     this.text = response.data;
-        // });            
+            this.get_filelist(true);         
       },
       methods: {
             signalUserInputChange: function(evt){
@@ -160,8 +155,7 @@
                    this.isEditing = true;
             },
             clickCallback: function(toPage, fromPage) {
-                console.log(toPage);
-                console.log(fromPage);
+                this.load_file(this.file_list[toPage-1].filename);
             },
             copy_text : function(){
                 document.getElementById("_text_field").innerHTML ='';
@@ -279,11 +273,6 @@
                     this.text = response.data;
                     this.current_file_contents = response.data;
                 });
-                // we will need to switch to this post instead of the get above once Neer makes the api endpoint
-                // axios.post('/loadfile',{loadfile: filename})
-                //     .then(response => {
-                //     this.text = response.data;
-                // });   
             },
             get_filelist : function(loadfileCheck=false){
                 axios.get('/getfilelist')
