@@ -272,6 +272,7 @@
                     .then(response => {
                     this.text = response.data;
                     this.current_file_contents = response.data;
+                    this.current_active_file = filename;
                 });
             },
             get_filelist : function(loadfileCheck=false){
@@ -287,7 +288,7 @@
                 });   
             },
             load_spacy  : function (event) {
-                axios.get('/spacy')
+                axios.post('/loadfile',{filename: this.current_active_file + '.spacy'})
                     .then(response => {
                         var spacy_text = response.data;
                         var i = 0;
@@ -321,7 +322,22 @@
                             document.getElementById("_text_field").innerHTML += `<div id="doc_${i}">${return_text}</div>`;
                             i++;
                         }
+                    })
+                    .catch(function (error) {
+                        if (error.response) {
+                            // Request made and server responded
+                            console.log(error.response.data);
+                            console.log(error.response.status);
+                            console.log(error.response.headers);
+                        } else if (error.request) {
+                            // The request was made but no response was received
+                            console.log(error.request);
+                        } else {
+                            // Something happened in setting up the request that triggered an Error
+                            console.log('Error', error.message);
+                        }
                     });
+                
             },
             preventNav(event) {
             if (!this.isEditing) return
