@@ -53,14 +53,21 @@ app.post("/loadfile", (req, res) => {
     }
     
 });
+
 app.get("/spacy", (req, res) => {
     var response = fs.readFileSync('./data/spacy.txt', 'utf8');
     res.send(response);
 });
 
 app.post("/save", (req, res) => {
+    var documentFile;
     // Set the filename, contents and our variable that will hold the final content to persist
-    var documentFile = './data/'+ req.body.filename;
+    if (req.body.filename == "tags.json") {
+        documentFile = env.tagsDocPath;
+    }
+    else {
+        documentFile = env.dataPath + '/' + req.body.filename;
+    }
     var saveContents = req.body.content;
     var persist;
     //exists because we want to stringify objects from bodyparser for persisting to a file, otherwise it saves the [object Object] as the value
