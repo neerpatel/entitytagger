@@ -46,9 +46,19 @@ app.get("/tags", (req, res) => {
 
 app.post("/loadfile", (req, res) => {
     if (req.body.filename != undefined && fs.existsSync(env.dataPath + '/' + req.body.filename) ) {
-        var response = fs.readFileSync(env.dataPath + '/' + req.body.filename, 'utf8');
-        res.send(response);
+        var data;
+        var dataType;
+        if (fs.existsSync(env.dataPath + '/' + req.body.filename + '.spacy') ) {
+            data =  fs.readFileSync(env.dataPath + '/' + req.body.filename + '.spacy', 'utf8');
+            dataType = 'spacy';
+        }
+        else {
+            data = fs.readFileSync(env.dataPath + '/' + req.body.filename, 'utf8');
+            dataType = 'text';
+        }
+        res.send({ type: dataType, content: data});
     } else {
+        console.log (req.body);
         res.status(404).json({ error: "Data File Not Found"});
     }
     
