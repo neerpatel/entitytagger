@@ -144,3 +144,4 @@ desktop.ini
 spacy.txt
 tags.json
 text.txt
+*.spacy
