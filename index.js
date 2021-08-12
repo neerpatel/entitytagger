@@ -82,8 +82,6 @@ app.get("/merged-spacy", (req, res) => {
         }
     });
     spacyData += "]\n";
-
-
     res.send(removeBlankSpacyLines(spacyData));
 });
 
