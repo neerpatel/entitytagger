@@ -74,7 +74,7 @@ app.get("/merged-spacy", (req, res) => {
     var data;
     var spacyData = "train_data = [\n";
     files.forEach(function (file) {
-        if (file.isFile() && (/(.*)\.spacy/g).test(file.name)) {
+        if (file.isFile() && (/(.*)\.spacy/g).test(file.name) && !(/merged\.spacy/g).test(file.name)) {
             data = fs.readFileSync(env.dataPath + '/' + file.name, 'utf8').toString().split("\n");
             for (let i = 1; i < data.length-1; i++) {
                 spacyData += data[i] + "\n";
@@ -82,6 +82,8 @@ app.get("/merged-spacy", (req, res) => {
         }
     });
     spacyData += "]\n";
+
+    fs.writeFileSync(env.dataPath + '/merged.spacy', spacyData, {encoding:'utf8',flag:'w'});
     res.send(removeBlankSpacyLines(spacyData));
 });
 
