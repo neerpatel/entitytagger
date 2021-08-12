@@ -15,6 +15,11 @@ function rndColor(arr) {
     return color;
 }
 
+function removeBlankSpacyLines(data) { // remove blank spacy lines
+    var regex = /^\("", \[ \]\),.*$/gm
+    return data.replace(regex, "").replace(/^\s*$(?:\r\n?|\n)/gm,'');
+}
+
 isObject = function(a) {
     return (!!a) && (a.constructor === Object);
 };
@@ -62,6 +67,24 @@ app.post("/loadfile", (req, res) => {
         res.status(404).json({ error: "Data File Not Found"});
     }
     
+});
+
+app.get("/merged-spacy", (req, res) => {
+    var files = fs.readdirSync(env.dataPath, { withFileTypes: true });
+    var data;
+    var spacyData = "train_data = [\n";
+    files.forEach(function (file) {
+        if (file.isFile() && (/(.*)\.spacy/g).test(file.name)) {
+            data = fs.readFileSync(env.dataPath + '/' + file.name, 'utf8').toString().split("\n");
+            for (let i = 1; i < data.length-1; i++) {
+                spacyData += data[i] + "\n";
+            }
+        }
+    });
+    spacyData += "]\n";
+
+
+    res.send(removeBlankSpacyLines(spacyData));
 });
 
 app.get("/spacy", (req, res) => {
