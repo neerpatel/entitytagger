@@ -270,8 +270,8 @@
                 console.log(filename);
                 axios.post('/loadfile',{filename: filename})
                     .then(response => {
-                    this.text = response.data;
-                    this.current_file_contents = response.data;
+                    this.text = response.data.content;
+                    this.current_file_contents = response.data.content;
                     this.current_active_file = filename;
                 });
             },
