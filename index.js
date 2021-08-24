@@ -18,7 +18,7 @@ function rndColor(arr) {
 }
 
 function removeBlankSpacyLines(data) { // remove blank spacy lines
-  const regex = /^\("", \[ \]\),.*$/gm;
+  const regex = /^\(".*", \[ \]\),.*$/gm;
   return data.replace(regex, '').replace(/^\s*$(?:\r\n?|\n)/gm, '');
 }
 
@@ -34,7 +34,10 @@ app.get('/getfilelist', (req, res) => {
   const files = fs.readdirSync(env.dataPath, { withFileTypes: true });
   files.forEach((file) => {
     if (file.isFile() && (/(.*)\.txt$/g).test(file.name)) {
-      response.push({ filename: file.name });
+
+      response.push({ 
+        filename: file.name,
+       });
     }
   });
   res.send(response);
